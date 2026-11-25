@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>tvOS Dashboard</title>
+  <style>
+    :root {
+      --bg-gradient: radial-gradient(circle at 20% 15%, #1e293b 0%, #0f172a 48%, #020617 100%);
+      --glass: rgba(255, 255, 255, 0.12);
+      --glass-border: rgba(255, 255, 255, 0.24);
+      --text-primary: #f8fafc;
+      --text-secondary: rgba(248, 250, 252, 0.68);
+      --accent: #38bdf8;
+    }
+    * { box-sizing: border-box; margin: 0; padding: 0; user-select: none; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-gradient);
+      color: var(--text-primary);
+      height: 100vh;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 36px 64px 48px;
+      transition: background 0.8s ease;
+    }
+    /* Top Dock */
+    .top-bar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .dock {
+      display: flex;
+      gap: 10px;
+      padding: 8px 14px;
+      background: var(--glass);
+      backdrop-filter: blur(28px);
+      -webkit-backdrop-filter: blur(28px);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      box-shadow: 0 12px 32px rgba(0, 0, 0, 0.35);
+    }
+    .dock-item {
+      padding: 10px 24px;
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      transition: all 0.22s cubic-bezier(0.22, 1, 0.36, 1);
+    }
+    .dock-item.focused, .dock-item.active {
+      background: #ffffff;
+      color: #0f172a;
+      transform: scale(1.06);
+      box-shadow: 0 6px 20px rgba(255, 255, 255, 0.3);
+    }
+    .status-pill {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 10px 24px;
+      background: var(--glass);
+      backdrop-filter: blur(24px);
+      border: 1px solid var(--glass-border);
+      border-radius: 999px;
+      font-size: 20px;
+      font-weight: 500;
+    }
+    /* Hero Spotlight */
+    .hero {
+      position: relative;
+      height: 360px;
+      border-radius: 32px;
+      padding: 44px 52px;
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      background: linear-gradient(125deg, rgba(15, 23, 42, 0.92) 0%, rgba(30, 41, 59, 0.55) 55%, rgba(56, 189, 248, 0.28) 100%);
+      border: 1px solid var(--glass-border);
+      box-shadow: 0 28px 60px rgba(0, 0, 0, 0.5);
+      overflow: hidden;
+    }
+    .hero-badge {
+      display: inline-block;
+      width: fit-content;
+      padding: 6px 14px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.18);
+      font-size: 14px;
+      font-weight: 700;
+      letter-spacing: 1.4px;
+      text-transform: uppercase;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      font-size: 52px;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 10px;
+    }
+    .hero p {
+      font-size: 22px;
+      color: var(--text-secondary);
+      max-width: 680px;
+      margin-bottom: 24px;
+    }
+    .hero-btn {
+      width: fit-content;
+      padding: 14px 32px;
+      border-radius: 16px;
+      background: rgba(255, 255, 255, 0.2);
+      border: 1px solid rgba(255, 255, 255, 0.35);
+      color: #fff;
+      font-size: 20px;
+      font-weight: 600;
+      transition: all 0.22s ease;
+    }
+    .hero-btn.focused {
+      background: #ffffff;
+      color: #0f172a;
+      transform: scale(1.07);
+      box-shadow: 0 12px 30px rgba(255, 255, 255, 0.35);
+    }
+    /* App Row */
+    .section-title {
+      font-size: 22px;
+      font-weight: 600;
+      color: var(--text-secondary);
+      margin-bottom: 18px;
+      letter-spacing: 0.02em;
+    }
+    .app-grid {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 26px;
+    }
+    .app-card {
+      height: 168px;
+      border-radius: 28px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      border: 2px solid rgba(255, 255, 255, 0.14);
+      box-shadow: 0 16px 34px rgba(0, 0, 0, 0.38);
+      transition: transform 0.22s cubic-bezier(0.22, 1, 0.36, 1), border-color 0.2s, box-shadow 0.22s;
+    }
+    .app-card.focused {
+      transform: scale(1.09) translateY(-6px);
+      border-color: #ffffff;
+      box-shadow: 0 24px 48px rgba(0, 0, 0, 0.65), 0 0 0 4px rgba(255, 255, 255, 0.25);
+    }
+    .app-icon {
+      font-size: 38px;
+      font-weight: 800;
+    }
+    .app-name {
+      font-size: 21px;
+      font-weight: 600;
+    }
+    .app-sub {
+      font-size: 14px;
+      opacity: 0.8;
+    }
+  </style>
+</head>
+<body>
+  <div class="top-bar">
+    <div class="dock" id="dockRow">
+      <div class="dock-item active" data-row="0" data-col="0" data-action="home">Home</div>
+      <div class="dock-item" data-row="0" data-col="1" data-action="youtube">TizenTube</div>
+      <div class="dock-item" data-row="0" data-col="2" data-action="wallpaper">Aerial Theme</div>
+      <div class="dock-item" data-row="0" data-col="3" data-action="modules">TizenBrew</div>
+    </div>
+    <div class="status-pill">
+      <span>Jakarta</span>
+      <span id="clock">--:--</span>
+    </div>
+  </div>
+
+  <div class="hero" id="heroBanner">
+    <span class="hero-badge" id="heroBadge">FEATURED • AD-FREE 4K</span>
+    <h1 id="heroTitle">TizenTube</h1>
+    <p id="heroDesc">Watch YouTube in 4K with SponsorBlock, DeArrow, and zero ads on your Samsung TV.</p>
+    <div class="hero-btn" id="heroBtn" data-row="1" data-col="0" data-action="launch-hero">Open TizenTube</div>
+  </div>
+
+  <div>
+    <div class="section-title">Top Shelf Apps</div>
+    <div class="app-grid" id="appGrid"></div>
+  </div>
+
+  <script>
+    const APPS = [
+      {
+        name: "TizenTube",
+        sub: "Ad-Free YouTube",
+        badge: "FEATURED • AD-FREE 4K",
+        desc: "Watch YouTube in 4K with SponsorBlock, DeArrow, and zero ads on your Samsung TV.",
+        cta: "Open TizenTube",
+        icon: "▶",
+        bg: "linear-gradient(135deg, #dc2626, #7f1d1d)",
+        url: "https://www.youtube.com/tv"
+      },
+      {
+        name: "Netflix",
+        sub: "Movies & Series",
+        badge: "STREAMING • 4K HDR",
+        desc: "Continue watching your series and films in Ultra HD.",
+        cta: "Launch Netflix",
+        icon: "N",
+        bg: "linear-gradient(135deg, #b91c1c, #18181b)",
+        appId: "3201907018807"
+      },
+      {
+        name: "Prime Video",
+        sub: "Originals & Sports",
+        badge: "STREAMING • DOLBY",
+        desc: "Stream Amazon Originals, movies, and live sports.",
+        cta: "Launch Prime Video",
+        icon: "prime",
+        bg: "linear-gradient(135deg, #0284c7, #0c4a6e)",
+        appId: "3201910019365"
+      },
+      {
+        name: "Spotify",
+        sub: "Hi-Fi Music & Mixes",
+        badge: "AUDIO • PLAYLISTS",
+        desc: "Hip-Hop, R&B, House, and curated daily mixes on your TV speakers.",
+        cta: "Launch Spotify",
+        icon: "♫",
+        bg: "linear-gradient(135deg, #16a34a, #064e3b)",
+        appId: "3201606009684"
+      },
+      {
+        name: "Disney+",
+        sub: "Hotstar",
+        badge: "STREAMING • MARVEL & PIXAR",
+        desc: "Blockbusters, Disney classics, and exclusive series.",
+        cta: "Launch Disney+",
+        icon: "D+",
+        bg: "linear-gradient(135deg, #1d4ed8, #1e1b4b)",
+        appId: "3201901017640"
+      },
+      {
+        name: "Browser",
+        sub: "Web & Media",
+        badge: "UTILITY • FULLSCREEN",
+        desc: "Open Samsung Internet for web streams and local media.",
+        cta: "Open Browser",
+        icon: "🌐",
+        bg: "linear-gradient(135deg, #6d28d9, #2e1065)",
+        appId: "org.tizen.browser"
+      }
+    ];
+
+    const THEMES = [
+      "radial-gradient(circle at 20% 15%, #1e293b 0%, #0f172a 48%, #020617 100%)",
+      "radial-gradient(circle at 80% 15%, #312e81 0%, #0f172a 52%, #020617 100%)",
+      "radial-gradient(circle at 25% 20%, #064e3b 0%, #0f172a 52%, #020617 100%)",
+      "radial-gradient(circle at 75% 20%, #7c2d12 0%, #18181b 52%, #09090b 100%)"
+    ];
+    let themeIdx = 0;
+
+    const grid = document.getElementById("appGrid");
+    APPS.forEach((app, idx) => {
+      const card = document.createElement("div");
+      card.className = "app-card";
+      card.style.background = app.bg;
+      card.dataset.row = "2";
+      card.dataset.col = String(idx);
+      card.innerHTML = `
+        <div class="app-icon">${app.icon}</div>
+        <div>
+          <div class="app-name">${app.name}</div>
+          <div class="app-sub">${app.sub}</div>
+        </div>
+      `;
+      card.addEventListener("click", () => launchApp(app));
+      grid.appendChild(card);
+    });
+
+    let curRow = 2;
+    let curCol = 0;
+
+    function updateFocus() {
+      document.querySelectorAll(".focused").forEach(el => el.classList.remove("focused"));
+      const target = document.querySelector(`[data-row="${curRow}"][data-col="${curCol}"]`);
+      if (target) target.classList.add("focused");
+      if (curRow === 2) {
+        const app = APPS[curCol];
+        document.getElementById("heroBadge").textContent = app.badge;
+        document.getElementById("heroTitle").textContent = app.name;
+        document.getElementById("heroDesc").textContent = app.desc;
+        document.getElementById("heroBtn").textContent = app.cta;
+      }
+    }
+
+    function launchApp(app) {
+      if (app.url) {
+        window.location.href = app.url;
+        return;
+      }
+      if (window.tizen && tizen.application && app.appId) {
+        try {
+          tizen.application.launch(app.appId);
+        } catch (e) {
+          console.error("Launch failed:", e);
+        }
+      }
+    }
+
+    function handleSelect() {
+      if (curRow === 0) {
+        if (curCol === 1) launchApp(APPS[0]);
+        if (curCol === 2) {
+          themeIdx = (themeIdx + 1) % THEMES.length;
+          document.body.style.background = THEMES[themeIdx];
+        }
+        if (curCol === 3 && window.history.length > 1) window.history.back();
+      } else if (curRow === 1) {
+        launchApp(APPS[curCol] || APPS[0]);
+      } else if (curRow === 2) {
+        launchApp(APPS[curCol]);
+      }
+    }
+
+    document.addEventListener("keydown", (e) => {
+      const maxCols = curRow === 0 ? 4 : curRow === 1 ? 1 : APPS.length;
+      if (e.key === "ArrowRight") {
+        curCol = (curCol + 1) % maxCols;
+        updateFocus();
+      } else if (e.key === "ArrowLeft") {
+        curCol = (curCol - 1 + maxCols) % maxCols;
+        updateFocus();
+      } else if (e.key === "ArrowDown") {
+        curRow = Math.min(2, curRow + 1);
+        curCol = curRow === 1 ? 0 : Math.min(curCol, APPS.length - 1);
+        updateFocus();
+      } else if (e.key === "ArrowUp") {
+        curRow = Math.max(0, curRow - 1);
+        curCol = curRow === 1 ? 0 : Math.min(curCol, 3);
+        updateFocus();
+      } else if (e.key === "Enter") {
+        handleSelect();
+      }
+    });
+
+    function updateClock() {
+      const now = new Date();
+      document.getElementById("clock").textContent = now.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+    }
+    updateClock();
+    setInterval(updateClock, 15000);
+    updateFocus();
+  </script>
+</body>
+</html>

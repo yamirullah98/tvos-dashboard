@@ -1,0 +1,11 @@
+{
+  "name": "tvos-dashboard",
+  "version": "1.0.0",
+  "description": "Apple TV (tvOS) style UI dashboard for TizenBrew",
+  "main": "index.html",
+  "tizenbrew": {
+    "packageType": "app",
+    "appName": "tvOS Dashboard",
+    "appPath": "https://raw.githubusercontent.com/yamirullah98/tvos-dashboard/main/index.html"
+  }
+}
