@@ -6,6 +6,6 @@
   "tizenbrew": {
     "packageType": "app",
     "appName": "tvOS Dashboard",
-    "appPath": "https://raw.githubusercontent.com/yamirullah98/tvos-dashboard/main/index.html"
+    "appPath": "index.html"
   }
 }
